@@ -1,51 +1,3 @@
-Environment Setup:
-
-git clone https://github.com/Aravind3802/TrustFedNova.git
-
-cd ./TrustFedNova
-
-python3 -m venv .venv
-
-source .venv/bin/activate #for mac/linux based systems
-
-.\.venv\Scripts\activate.bat #for windows , in terminal
-
-pip install -r requirements.txt
-
-
-
-
-
-For running a smoke test you can use:
-
-python3 main.py \
-  --algs fedavg fedprox fednova trustfednova \
-  --rounds 2 \
-  --clients 6 \
-  --sampled 3 \
-  --batch_size 32 \
-  --lr 0.01 \
-  --momentum 0.9 \
-  --weight_decay 5e-4 \
-  --prox_mu 0.01 \
-  --mean_steps 5 \
-  --hetero_scale 0.3 \
-  --dirichlet_alpha 0.6 \
-  --eval_every 1 \
-  --server_lr 1.0 \
-  --num_workers 0 \
-  --log_every 1 \
-  --lam_min 0.2 \
-  --ema_beta 0.9 \
-  --ctrl_a 8.0 \
-  --ctrl_b 4.0 \
-  --ctrl_c 1.0 \
-  --ctrl_d -1.0 \
-  --seed 7 \
-  --save_dir ./runs_smoke
-
-
-
 Dynamic-Trust FedNova: Adaptive Federated Learning Under Client Heterogeneity
 
 Introduction:
@@ -97,3 +49,47 @@ FedProx (ɱ = 0.01)
 FedNova
 Dynamic-Trust FedNova
 
+#Environment Setup:
+```bash
+git clone https://github.com/Aravind3802/TrustFedNova.git
+
+cd ./TrustFedNova
+
+python3 -m venv .venv
+
+source .venv/bin/activate #for mac/linux based systems
+
+pip install -r requirements.txt
+```
+
+
+
+
+#For running a smoke test you can use:
+```bash
+python3 main.py \
+  --algs fedavg fedprox fednova trustfednova \
+  --rounds 2 \
+  --clients 6 \
+  --sampled 3 \
+  --batch_size 32 \
+  --lr 0.01 \
+  --momentum 0.9 \
+  --weight_decay 5e-4 \
+  --prox_mu 0.01 \
+  --mean_steps 5 \
+  --hetero_scale 0.3 \
+  --dirichlet_alpha 0.6 \
+  --eval_every 1 \
+  --server_lr 1.0 \
+  --num_workers 0 \
+  --log_every 1 \
+  --lam_min 0.2 \
+  --ema_beta 0.9 \
+  --ctrl_a 8.0 \
+  --ctrl_b 4.0 \
+  --ctrl_c 1.0 \
+  --ctrl_d -1.0 \
+  --seed 7 \
+  --save_dir ./runs_smoke
+```
