@@ -44,9 +44,9 @@ Experimental Setup:
 Experiments have been conducted on the CIFAR-10 dataset using a simple, lightweight CNN suitable for distributed systems. The data set for each client has been split by using the Dirichlet Distribution with 𝛂 = 0.3, that reflects an highly non-IID data distributed as in a real-world scenario and the number of local steps for each client is sampled from a lognormal distribution, which helps in simulating the varied computing speeds of each client. The simulation was run for a total of 120 rounds.
 
 Baselines:
-FedAvg
-FedProx (ɱ = 0.01)
-FedNova
+FedAvg,
+FedProx (ɱ = 0.01),
+FedNova,
 Dynamic-Trust FedNova
 
 Environment Setup:
