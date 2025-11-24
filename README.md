@@ -49,7 +49,7 @@ FedProx (ɱ = 0.01)
 FedNova
 Dynamic-Trust FedNova
 
-#Environment Setup:
+Environment Setup:
 ```bash
 git clone https://github.com/Aravind3802/TrustFedNova.git
 
@@ -65,7 +65,7 @@ pip install -r requirements.txt
 
 
 
-#For running a smoke test you can use:
+For running a smoke test you can use:
 ```bash
 python3 main.py \
   --algs fedavg fedprox fednova trustfednova \
