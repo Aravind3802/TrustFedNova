@@ -18,12 +18,12 @@ class ClientConfig:
     LearningRate: float = 0.01
     Momentum: float = 0.9
     WeightDecay: float = 5e-4
-    ProxMu: float = 0.0  # FedProx μ - proximal term's multiplier
+    ProxMu: float = 0.0  
 
 
 def LocalTrain(
     Model: nn.Module,
-    BaseState: Dict[str, torch.Tensor],  # w_t (float-only dict)
+    BaseState: Dict[str, torch.Tensor], 
     DataLoaderObject: DataLoader,
     Steps: int,
     Device: torch.device,
@@ -31,7 +31,7 @@ def LocalTrain(
     AlgorithmName: str,
 ) -> Tuple[Dict[str, torch.Tensor], int, int, float]:
     
-    Model.load_state_dict(BaseState, strict=False)  # float-only dict
+    Model.load_state_dict(BaseState, strict=False)  
     Model.to(Device)
     Model.train()
 
