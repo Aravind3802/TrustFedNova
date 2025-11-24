@@ -1,0 +1,200 @@
+Step 1:
+Define all necessary imports statements
+Setup the environment and define utility functions
+
+Step 2:
+Download and prepare CIFAR-10 dataset:
+	Train dataset with augmentation
+	Test dataset with normalisation
+Step 3:
+Partition Dataset:
+	Partition the Dataset using Dirichilet Distritbution to create non-IID datasets for each client
+	
+Step 4:
+Deine small CNN model for CIFAR-10 Classification
+
+Define ClientConfigation:
+	Batch Size
+	Learning rate
+	Momentum
+	Weight Decay
+	FedProx Mu
+
+Define ServerConfiguration:
+	Number of Rounds
+	Total Clients
+	Sampled Clients per round
+	mean local steps per Client
+	Heterogenity scale for local steps
+	Dirichilet paramter for non-IID distribution
+	Evaluation Frequency
+	Server Learning Rate
+	Controller parameters
+	Logging method
+
+Step 5:
+
+Define the Dynamic Controller module for TrustFedNova
+	Keeps track os validation loss
+	an Exponential Moving average of lambda values
+
+In Each round:
+	Given are:
+		Chi^2 for abjective inconsistency
+		Cos for cosine similarity between FedAvg and FedNova
+		And Validation Loss
+
+	Computes:
+		A score using weighted combination of Chi^2, (1-cos) and an indicator of whther loss has improved
+		or not
+		pass score through sigmoid function to get raw lambda
+		smooth lambda over time with EMA
+		clamp lambda into [lambd_min,1]
+
+Return lambda_t which belong to [lambda_min,1]
+
+
+Step 6:
+
+Function definition for Local training( parameter list: model, baseWeights, ClientData, Steps, ClientConfiguration, Algorithm)
+
+	Load BaseWeights into model
+	Create SGD with client Configuration hyperparameters
+	
+	IF algorithm is FedProx:
+		Store a copy of base parameters
+
+	For a fixed number of local steps:
+		Get a minibatch from client data
+		forward pass, computer corss-entropy loss
+		IF FedProx:
+			Add proximal penalty  between parameters and base paramters
+		Back propagate and update model parameters
+
+	Compute delta = base_weights - updates_weights
+	Return delta and some diagnostics
+
+Step 7:
+Define the aggregator(parameters list: baseWeights, Client_delta, local steps, sample counts, validation loss)
+
+	computer proportion of samples for each client
+	FedAvg update u_FA:
+        u_FA = weighted sum of client_deltas using client data proportions p_i
+
+    FedNova update u_FN:
+        normalize each delta by its local steps tau_i
+        u_FN = weighted sum of (delta_i / tau_i) using p_i
+
+    Compute Chi^2_FA:
+        use p_i and p_i * tau_i as a proxy for objective inconsistency
+
+    Compute cosine similarity between u_FA and u_FN
+
+    If algorithm == FedAvg:
+        lambda = 0, update = u_FA
+
+    Else if algorithm == FedNova:
+        lambda = 1, update = u_FN
+
+    Else if algorithm == FedProx:
+        lambda = 0, update = u_FA  (aggregation same as FedAvg)
+
+    Else if algorithm == TrustFedNova:
+        lambda = controller.Step(chi^2_FA, cos, validation loss)
+        update = (1 - lambda) * u_FA + lambda * u_FN 
+
+    Return update, lambda, chi^2_FA, cos
+
+Step 8:
+Define Evaluate function(parameter list: global_model and test data)
+
+	disable gradients
+	for each batch in test data:
+		compute logits
+		compute corss-entropy loss
+		Count correct predictions
+
+	return overall accuracy and average loss
+
+Step 9:
+
+define function  RunExperiment(parameters: algorithm):
+
+    Initialize global_model with random weights
+    Clone initial weights as base_weights
+
+    If algorithm is TrustFedNova:
+        Create DynamicController with chosen hyperparameters
+    Else:
+        controller = None
+
+    For round = 1 to total_rounds:
+
+        1) Sample a subset of clients uniformly at random
+
+        2) For each selected client:
+            - Sample its local steps tau_i from a lognormal distribution
+              (heterogeneous local computation)
+            - Run LocalTrain with:
+                * current global_model
+                * base_weights snapshot
+                * client’s local DataLoader
+                * tau_i steps
+                * client_config
+                * chosen algorithm
+            - Collect delta_i and the client’s sample count
+
+        3) Optionally evaluate global_model on test data
+           to get validation loss for controller
+
+        4) Aggregate updates:
+            - Call Aggregate(base_weights, deltas, tau, sample_counts, val_loss)
+            - Get global update u_t, lambda_t, chi^2_FA, cosine
+
+        5) Server update:
+            - new_weights = base_weights - server_lr * u_t
+            - load new_weights into global_model
+
+        6) Evaluate global_model after update:
+            - accuracy, loss = Evaluate(global_model, test_data)
+
+        7) Log per-round metrics:
+            - round index
+            - accuracy, loss
+            - lambda_t (for TrustFedNova)
+            - chi^2_FA and cosine similarity
+
+        8) Print round summary periodically
+
+
+    After all rounds:
+        - Save CSV log with per-round metrics
+        - Save final global model weights
+        - Return logs and total training time
+
+Step 10: 
+Experiment Driver definition
+
+Parse command-line arguments:
+    - which algorithms to run (fedavg, fedprox, fednova, trustfednova)
+    - number of rounds, clients, sampled clients per round
+    - client hyperparameters (batch size, lr, momentum, etc.)
+    - heterogeneity parameters (dirichlet_alpha, mean_steps, hetero_scale)
+    - controller hyperparameters (lambda_min, ema_beta, A, B, C, D)
+    - logging and output paths
+
+Load CIFAR-10, create model factory (SmallCifarCnn)
+
+For each algorithm specified:
+    - RunExperiment(algorithm)
+    - Record best and final accuracies
+
+Plot results:
+    - Accuracy vs rounds for all algorithms
+    - lambda_t vs rounds (for TrustFedNova)
+    - chi^2_FA vs rounds for all algorithms
+
+Print a summary table of:
+    - Algorithm, best accuracy, final accuracy, total time
+
+End
