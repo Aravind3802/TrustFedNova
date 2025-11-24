@@ -1,9 +1,15 @@
 Environment Setup:
+
 git clone https://github.com/Aravind3802/TrustFedNova.git
+
 cd ./TrustFedNova
+
 python3 -m venv .venv
+
 source .venv/bin/activate #for mac/linux based systems
+
 .\.venv\Scripts\activate.bat #for windows , in terminal
+
 pip install -r requirements.txt
 
 
